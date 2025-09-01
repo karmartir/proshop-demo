@@ -1,35 +1,45 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : { cartItems: []};
+const initialState = localStorage.getItem("cart")
+  ? JSON.parse(localStorage.getItem("cart"))
+  : { cartItems: [] };
+
+const addDecimals = (num) => {
+  return Number((Math.round(num * 100) / 100).toFixed(2));
+};
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addItem: (state, action) => {
-      const newItem = action.payload;
-      const existingItem = state.items.find(item => item.id === newItem.id);
-      if (existingItem) {
-        existingItem.quantity += newItem.quantity;
+    addToCart: (state, action) => {
+      const item = action.payload;
+
+      const existItem = state.cartItems.find((x) => x._id === item._id);
+
+      if (existItem) {
+        state.cartItems = state.cartItems.map((x) =>
+          x._id === existItem._id ? item : x
+        );
       } else {
-        state.items.push(newItem);
+        state.cartItems = [...state.cartItems, item];
       }
-      state.totalQuantity += newItem.quantity;
-    },
-    removeItem: (state, action) => {
-      const id = action.payload;
-      const existingItem = state.items.find(item => item.id === id);
-      if (existingItem) {
-        state.items = state.items.filter(item => item.id !== id);
-        state.totalQuantity -= existingItem.quantity;
-      }
-    },
-    clearCart: (state) => {
-      state.items = [];
-      state.totalQuantity = 0;
+
+      // Calculate Items price
+      state.itemsPrice = addDecimals(
+        state.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+      );
+      // Calculate shipping price (Free if itemsPrice > 100 then free, else $10 shipping)
+      state.shippingPrice = addDecimals(state.itemsPrice > 100 ? 0 : 10);
+      // Calculate tax price (15% of itemsPrice)
+      state.taxPrice = addDecimals(Number((0.15 * state.itemsPrice).toFixed(2)));
+      // Calculate total price
+      state.totalPrice = (Number(state.itemsPrice) + Number(state.shippingPrice) + Number(state.taxPrice)).toFixed(2);
+      
+      localStorage.setItem("cart", JSON.stringify(state));  
     },
   },
 });
 
-export const { addItem, removeItem, clearCart } = cartSlice.actions;
+export const { addToCart } = cartSlice.actions;
 export default cartSlice.reducer;
