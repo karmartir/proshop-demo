@@ -5,7 +5,6 @@ const initialState = localStorage.getItem("cart")
   ? JSON.parse(localStorage.getItem("cart"))
   : { cartItems: [] };
 
-
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -17,11 +16,14 @@ const cartSlice = createSlice({
 
       if (existItem) {
         state.cartItems = state.cartItems.map((x) =>
-          x._id === existItem._id ? item : x
+          x._id === existItem._id
+            ? { ...x, qty: x.qty + item.qty } // ✅ merge quantity
+            : x
         );
       } else {
         state.cartItems = [...state.cartItems, item];
       }
+
       return updateCart(state);
     },
   },
