@@ -17,7 +17,7 @@ const cartSlice = createSlice({
       if (existItem) {
         state.cartItems = state.cartItems.map((x) =>
           x._id === existItem._id
-            ? { ...x, qty: x.qty + item.qty } // ✅ merge quantity
+            ? { ...x, qty: item.qty } // ✅ replace quantity!!!
             : x
         );
       } else {
