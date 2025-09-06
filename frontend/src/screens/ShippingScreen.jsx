@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import FormContainer from '../components/FormContainer';
 import {saveShippingAddress} from '../slices/cartSlice';
 
-function ShippingScreen(props) {
+function ShippingScreen() {
 	const cart = useSelector((state) => state.cart);
 	const {shippingAddress} = cart;
 
