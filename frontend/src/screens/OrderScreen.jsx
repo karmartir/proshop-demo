@@ -5,11 +5,8 @@ import {
   Col,
   ListGroup,
   Image,
-  Form,
   Card,
-  Button,
-  ListGroupItem,
-} from "react-bootstrap";
+  Button} from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
@@ -88,16 +85,18 @@ const OrderScreen = () => {
       }
     });
   }
-  async function onApproveTest() {
-      await payOrder({
-        orderId,
-        details: {
-          payer: {},
-        },
-      });
-      refetch();
-      toast.success("Order is paid");
-    }
+  // Testing Only! Remove this in production! 
+  //async function onApproveTest() {
+  //     await payOrder({
+  //       orderId,
+  //       details: {
+  //         payer: {},
+  //       },
+  //     });
+  //     refetch();
+  //     toast.success("Order is paid");
+  //   }
+
   function onError(err) {
     toast.error(err.message);
   }
@@ -250,6 +249,7 @@ const OrderScreen = () => {
                   )}
                 </ListGroup.Item>
               )}
+              {loadingDeliver && <Loader />}
               {userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
                 <ListGroup.Item>
                   <Button type="button" className="btn btn-block" onClick={deliverOrderHandler}>
