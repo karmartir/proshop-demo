@@ -1,21 +1,28 @@
 import { LinkContainer } from "react-router-bootstrap";
 import { Table, Button, Row, Col } from "react-bootstrap";
 import { FaEdit,FaTrash} from "react-icons/fa";
-import { useGetProductsQuery, useCreateProductMutation } from "../../slices/productsApiSlice";
+import { useGetProductsQuery, useCreateProductMutation, useDeleteProductMutation } from "../../slices/productsApiSlice";
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
 import {toast} from 'react-toastify';
 
 
 const ProductListScreen = () => {
-  const { data: products, isLoading, error } = useGetProductsQuery();
+  const { data: products, isLoading, error, refetch } = useGetProductsQuery();
 
-  const [createProduct, {isLoading: loadingCreate}, refetch] = useCreateProductMutation();
-
-  const deleteHandler = (id) => {
-    if (window.confirm("Are you sure?")) {
-      // Dispatch delete action here
-      console.log(`Delete product with id: ${id}`);
+  const [createProduct, {isLoading: loadingCreate}] = useCreateProductMutation();
+  const [deleteProduct, {isLoading: loadingDelete}] = useDeleteProductMutation();
+  
+  
+  const deleteHandler = async (id) => {
+    if (window.confirm("Are you sure to delete this product?")) {
+      try {
+        await deleteProduct(id);
+        toast.success("Product deleted successfully");
+        refetch();
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
     }
   };
   
@@ -46,6 +53,7 @@ const ProductListScreen = () => {
         </Col>
       </Row>
       {loadingCreate && <Loader />}
+      {loadingDelete && <Loader />}
       {isLoading ? (
         <Loader />
       ) : error ? (

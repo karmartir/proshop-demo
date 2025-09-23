@@ -38,13 +38,13 @@ export const productsApiSlice = apiSlice.injectEndpoints({
         body: formData,
       }),
     }),
-    // deleteProduct: builder.mutation({
-    //   query: (ProductId) => ({
-    //     url: `${PRODUCTS_URL}/${ProductId}`,
-    //     method: "DELETE",
-    //   }),
-    // }),
+    deleteProduct: builder.mutation({
+      query: (ProductId) => ({
+        url: `${PRODUCTS_URL}/${ProductId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetProductsQuery, useGetProductDetailsQuery, useCreateProductMutation, useUpdateProductMutation, useUploadProductImageMutation } = productsApiSlice;
+export const { useGetProductsQuery, useGetProductDetailsQuery, useCreateProductMutation, useUpdateProductMutation, useUploadProductImageMutation, useDeleteProductMutation } = productsApiSlice;
