@@ -9,15 +9,25 @@ const getProducts = asyncHandler(async (req, res) => {
   // Pagination logic
   // Default page size is set to 4
   // If pageNumber is not provided, it defaults to 1
-  const pageSize = 4;
+  const pageSize = 8;
   const page = Number(req.query.pageNumber) || 1;
 
+  // Search keyword logic
+  const keyword = req.query.keyword
+    ? {
+        name: {
+          $regex: req.query.keyword,
+          $options: "i",
+        },
+      }
+    : {};
+
   // Count total number of products
-  const count = await Product.countDocuments();
+  const count = await Product.countDocuments({ ...keyword });
   
   // Fetch products with pagination
   // Limit the number of products returned based on pageSize and skip based on current page
-  const products = await Product.find({})
+  const products = await Product.find({ ...keyword })
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
