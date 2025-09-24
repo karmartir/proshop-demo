@@ -6,7 +6,31 @@ import Product from "../models/productModel.js";
 //@access  Public
 
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = 2;
+  // Pagination logic
+  // Default page size is set to 4
+  // If pageNumber is not provided, it defaults to 1
+  const pageSize = 4;
+  const page = Number(req.query.pageNumber) || 1;
+
+  // Count total number of products
+  const count = await Product.countDocuments();
+  
+  // Fetch products with pagination
+  // Limit the number of products returned based on pageSize and skip based on current page
+  const products = await Product.find({})
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  // Return the products along with current page and total pages
+  res.json({ products, page, pages: Math.ceil(count / pageSize) });
+});
+
+//@desc    Fetch paginated products
+//@route   GET /api/products?pageNumber=
+//@access  Public
+
+const getPaginatedProducts = asyncHandler(async (req, res) => {
+  const pageSize = 4;
   const page = Number(req.query.pageNumber) || 1;
   const count = await Product.countDocuments();
   const products = await Product.find({}).limit(pageSize).skip(pageSize * (page -1));

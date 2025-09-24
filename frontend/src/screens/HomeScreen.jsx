@@ -4,17 +4,20 @@ import Product from "../components/Product";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import { useGetProductsQuery } from "../slices/productsApiSlice";
+import Paginate from "../components/Paginate";
 
 const HomeScreen = () => {
-  const {pageNumber} = useParams();
-  const { data, isLoading, error } = useGetProductsQuery({pageNumber});
+  const { pageNumber } = useParams();
+  const { data, isLoading, error } = useGetProductsQuery({ pageNumber });
 
   return (
     <>
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">{error?.data?.message || error.error}</Message>
+        <Message variant="danger">
+          {error?.data?.message || error.error}
+        </Message>
       ) : (
         <>
           <h1>Latest Products</h1>
@@ -25,6 +28,8 @@ const HomeScreen = () => {
               </Col>
             ))}
           </Row>
+
+          <Paginate pages={data.pages} page={data.page} isAdmin={false} />
         </>
       )}
     </>
