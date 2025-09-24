@@ -1,5 +1,5 @@
-import { Row, Col } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Row, Col, Button } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
 import Product from "../components/Product";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
@@ -15,6 +15,16 @@ const HomeScreen = () => {
 
   return (
     <>
+    {keyword ? (
+      <>
+        <h2>
+          Search Results for "<strong>{keyword}</strong>"
+        </h2>
+        <Link to='/' className="mb-3 d-inline-block text-dark">
+          <Button variant="light">Go Back</Button>
+        </Link>
+      </>
+      ) : <h1>Latest Products</h1>  }
       {isLoading ? (
         <Loader />
       ) : error ? (
@@ -23,7 +33,7 @@ const HomeScreen = () => {
         </Message>
       ) : (
         <>
-          <h1>Latest Products</h1>
+          
           <Row>
             {data.products.map((product) => (
               <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
