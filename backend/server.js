@@ -21,10 +21,12 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 app.use(cookieParser()); // Middleware to parse cookies
 
-// Basic route to check if the API is running
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+// Basic route to check if the API is running (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
 
 // Route Handlers
 app.use('/api/products', productRoutes);
@@ -39,6 +41,26 @@ app.get('/api/config/paypal', (req, res) => {
 const __dirname = path.resolve(); // Get the current directory path
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));  
 // Serve static files from the uploads directory  
+if (process.env.NODE_ENV === 'production') {
+  // Serve static frontend build
+  app.use(express.static(path.join(__dirname, '/frontend/build')));
+
+  // Serve index.html for root path
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  });
+
+  // Optional: add individual routes for React routing if needed
+  app.get('/product/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  });
+  app.get('/cart', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  });
+  app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+  });
+}
 
 // Error Handling Middleware
 app.use(notFound);
