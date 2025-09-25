@@ -19,40 +19,38 @@ const storage = multer.diskStorage({
 });
 
 // File type validation
-function checkFileType(file, cb) {
-  const filetypes = /jpg|jpeg|png|webp/;
-  const extname = filetypes.test(
-    path.extname(file.originalname).toLowerCase()
-  );
-  const mimetype = filetypes.test(file.mimetype);
+function fileFilter(req, file, cb) {
+  const filetypes = /jpe?g|png|webp/;
+  const mimetypes = /image\/jpe?g|image\/png|image\/webp/;
+
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = mimetypes.test(file.mimetype);
 
   if (extname && mimetype) {
-    return cb(null, true);
+    cb(null, true);
   } else {
-    cb('Images only! (jpg, jpeg, png, webp)');
+    cb(new Error('Images only!'), false);
   }
 }
 
-const upload = multer({
-  storage,
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  },
-});
+const upload = multer({ storage, fileFilter });
+const uploadSingleImage = upload.single('image');
 
 // @route   POST /api/upload
 // @desc    Upload a file
 // @access  Private/Admin
 
-router.post(
-  '/',
-  //ensureAdmin,
-  upload.single('image'),
-  (req, res) => {
+router.post('/', (req, res) => {
+  uploadSingleImage(req, res, function (err) {
+    if (err) {
+      res.status(400).send({ message: err.message });
+    }
+
     res.status(200).send({
-        message: 'File uploaded successfully',
-        image: `/${req.file.path}`,
-      });
-  }
-);                    
+      message: 'Image uploaded successfully',
+      image: `/${req.file.path}`,
+    });
+  });
+});
+                   
 export default router;
