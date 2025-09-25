@@ -43,7 +43,10 @@ const cartSlice = createSlice({
       state.cartItems = [];
       return updateCart(state);
     },
-    resetCart: () => initialState,
+    resetCart: () => {
+  localStorage.removeItem("cart");   // ✅ remove persisted cart
+  return { cartItems: [], shippingAddress: {}, paymentMethod: "Paypal" };
+}
   },
 });
 
