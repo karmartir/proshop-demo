@@ -17,7 +17,7 @@ const HomeScreen = () => {
 
   return (
     <>
-    <Meta title="Welcome To ProShop!"/>
+    <Meta title="Welcome To ProShop!!!"/>
     {!keyword ? <ProductCarousel /> : keyword ? (
       <>
         <h2>
