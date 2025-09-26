@@ -1,4 +1,4 @@
-import {Helmet} from 'react-helmet-async';
+import {Helmet} from 'react-helmet';
 const Meta = ({title, description, keywords}) => {
   return (
     <div>
