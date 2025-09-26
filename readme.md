@@ -17,7 +17,17 @@ A full-stack eCommerce application built **from scratch** with the **MERN stack*
 - **Deployment:** Render (backend + frontend), MongoDB Atlas (DB)  
 
 ## 📸 Screenshots  
-...soon
+### Home Page  
+![Home Page](./screenshots/home.png)  
+
+### Users Page  
+![Users Page](./screenshots/users.png)  
+
+### Cart  
+![Cart](./screenshots/cart.png)  
+
+### Admin Dashboard  
+![Admin Dashboard](./screenshots/admin.png)  
 
 ## 🔑 Environment Variables  
 Create a `.env` file in the backend root:  
