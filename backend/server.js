@@ -9,6 +9,7 @@ import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import { protect, admin } from './middleware/authMiddleware.js';
 
 // Set the port from environment variables or default to 5000
 const port = process.env.PORT || 5000;
@@ -43,8 +44,16 @@ if (process.env.NODE_ENV === 'production') {
   // Serve React build
   app.use(express.static(path.join(__dirname, '/frontend/build')));
 
-  // List of SPA static routes
-  const spaRoutes = ['/', '/cart', '/login', '/profile', '/shipping', '/payment', '/placeorder'];
+  // List of SPA static routes excluding admin pages
+  const spaRoutes = [
+    '/',
+    '/cart',
+    '/login',
+    '/profile',
+    '/shipping',
+    '/payment',
+    '/placeorder'
+  ];
 
   // Dynamic routes
   const dynamicRoutes = ['/product/:id', '/page/:pageNumber'];
@@ -56,9 +65,17 @@ if (process.env.NODE_ENV === 'production') {
     });
   });
 
-  // Serve index.html for all SPA static routes
+  // Serve index.html for all SPA static routes excluding admin pages
   spaRoutes.forEach(route => {
     app.get(route, (req, res) => {
+      res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
+    });
+  });
+
+  // Serve index.html for admin SPA routes with authentication
+  const adminRoutes = ['/admin/userlist', '/admin/productlist', '/admin/orderlist'];
+  adminRoutes.forEach(route => {
+    app.get(route, protect, admin, (req, res) => {
       res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
     });
   });
