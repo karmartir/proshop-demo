@@ -41,45 +41,18 @@ const __dirname = path.resolve(); // Get the current directory path
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 if (process.env.NODE_ENV === 'production') {
-  // Serve React build
+  // Serve static React build
   app.use(express.static(path.join(__dirname, '/frontend/build')));
 
-  // List of SPA static routes excluding admin pages
-  const spaRoutes = [
-    '/',
-    '/cart',
-    '/login',
-    '/profile',
-    '/shipping',
-    '/payment',
-    '/placeorder'
-  ];
-
-  // Dynamic routes
-  const dynamicRoutes = ['/product/:id', '/page/:pageNumber'];
-
-  // Serve index.html for dynamic routes
-  dynamicRoutes.forEach(route => {
-    app.get(route, (req, res) => {
-      res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
-    });
+  // Admin routes: all /admin/* paths require authentication
+  app.get(/^\/admin\/.*/, protect, admin, (req, res) => {
+    res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
   });
 
-  // Serve index.html for all SPA static routes excluding admin pages
-  spaRoutes.forEach(route => {
-    app.get(route, (req, res) => {
-      res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
-    });
+  // All other frontend routes (non-API, non-admin) serve index.html
+  app.get(/^\/(?!api|admin).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
   });
-
-  // Serve index.html for admin SPA routes with authentication
-  const adminRoutes = ['/admin/userlist', '/admin/productlist', '/admin/orderlist'];
-  adminRoutes.forEach(route => {
-    app.get(route, protect, admin, (req, res) => {
-      res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
-    });
-  });
-
 } else {
   app.get('/', (req, res) => {
     res.send('API is running...');
