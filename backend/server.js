@@ -43,15 +43,20 @@ if (process.env.NODE_ENV === 'production') {
   // Serve React build
   app.use(express.static(path.join(__dirname, '/frontend/build')));
 
-  // List of SPA routes
+  // List of SPA static routes
   const spaRoutes = ['/', '/cart', '/login', '/profile', '/shipping', '/payment', '/placeorder'];
 
-  // Dynamic product route
-  app.get('/product/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
+  // Dynamic routes
+  const dynamicRoutes = ['/product/:id', '/page/:pageNumber'];
+
+  // Serve index.html for dynamic routes
+  dynamicRoutes.forEach(route => {
+    app.get(route, (req, res) => {
+      res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
+    });
   });
 
-  // Serve index.html for all SPA routes
+  // Serve index.html for all SPA static routes
   spaRoutes.forEach(route => {
     app.get(route, (req, res) => {
       res.sendFile(path.join(__dirname, '/frontend/build', 'index.html'));
