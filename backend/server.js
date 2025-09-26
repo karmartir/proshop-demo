@@ -22,9 +22,9 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
 app.use(cookieParser()); // Middleware to parse cookies
 
 // Basic route to check if the API is running
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+// app.get('/', (req, res) => {
+//   res.send('API is running...');
+// });
 
 // Route Handlers
 app.use('/api/products', productRoutes);
@@ -37,7 +37,20 @@ app.get('/api/config/paypal', (req, res) => {
 });
 
 const __dirname = path.resolve(); // Get the current directory path
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));  
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '/frontend/build')));
+  // Serve index.html for all other routes
+  app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
+
 // Serve static files from the uploads directory  
 
 // Error Handling Middleware

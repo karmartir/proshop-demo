@@ -9,7 +9,7 @@ const getProducts = asyncHandler(async (req, res) => {
   // Pagination logic
   // Default page size is set to 4
   // If pageNumber is not provided, it defaults to 1
-  const pageSize = 8;
+  const pageSize = process.env.PAGINATION_LIMIT || 4;
   const page = Number(req.query.pageNumber) || 1;
 
   // Search keyword logic
