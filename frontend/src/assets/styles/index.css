@@ -88,10 +88,6 @@ table th {
 .main-image {
   width: 100%;       /* scale to container width */
   height: 100%;      /* scale to container height */
-  object-fit: cover; /* crop to fill container, maintain aspect ratio */
+  object-fit: contain; /* crop to fill container, maintain aspect ratio */
   transition: transform 0.3s ease;
-}
-.main-image-container:hover .main-image {
-  transform: scale(1.2); /* zoom in */
-  cursor: grab;
 }
