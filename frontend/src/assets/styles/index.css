@@ -23,6 +23,13 @@ main {
   white-space: nowrap; /* Prevent wrapping */
 }
 
+
+.product-image {
+  height: 200px;       /* uniform image box */
+  width: 100%;
+  object-fit: contain; /* keep proportions, no stretching */
+}
+
 table td,
 table th {
   text-align: center;
