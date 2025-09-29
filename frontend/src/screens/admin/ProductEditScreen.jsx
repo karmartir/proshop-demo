@@ -15,7 +15,7 @@ const ProductEditScreen = () => {
   const { id: productId } = useParams();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
+const [images, setImages] = useState([]); // start with empty array
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [countInStock, setCountInStock] = useState("");
@@ -36,7 +36,7 @@ const ProductEditScreen = () => {
     if (product) {
       setName(product.name);
       setPrice(product.price);
-      setImage(product.image);
+      setImages(product.images || [product.image]);
       setBrand(product.brand);
       setCategory(product.category);
       setCountInStock(product.countInStock);
@@ -50,7 +50,7 @@ const ProductEditScreen = () => {
       productId,
       name,
       price,
-      image,
+      images,
       brand,
       category,
       description,
@@ -65,12 +65,17 @@ const ProductEditScreen = () => {
     }
   };
   const uploadFileHandler = async (e) => {
+     if (images.length + e.target.files.length > 4) {
+    toast.error('Maximum 4 images allowed. Remove some images first.');
+    e.target.value = ""; // reset file input
+    return;
+  }
     const formData = new FormData();
     formData.append("image", e.target.files[0]);
     try {
       const res = await uploadProductImage(formData).unwrap();
       toast.success(res.message);
-      setImage(res.image);
+      setImages(prev => [...prev, res.image]);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
       e.target.value = "";
@@ -128,6 +133,7 @@ const ProductEditScreen = () => {
                 label="Choose File"
                 onChange={uploadFileHandler}
                 type="file"
+                multiple
               ></Form.Control>
               {loadingUpload && <Loader />}
             </Form.Group>

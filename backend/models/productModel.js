@@ -27,9 +27,10 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String,
+    images: {
+      type: [String],
       required: true,
+      validate: [val => val.length <= 4, 'Maximum 4 images allowed'],
     },
     brand: {
       type: String,

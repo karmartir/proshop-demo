@@ -1,12 +1,21 @@
+import {useState} from 'react';
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Rating from "./Rating";
 
 const Product = ({ product }) => {
+  const imagesArray =
+  product.images && product.images.length > 0
+    ? product.images
+    : product.image
+    ? [product.image]
+    : []; // empty fallback
+
+  const [currentImage, setCurrentImage] = useState(imagesArray[0] || '');
   return (
     <Card className="my-3 p-3 rounded product-card">
       <Link to={`/product/${product._id}`}>
-        <Card.Img className="product-image" src={product.image} variant="top" alt={product.name} />
+        <Card.Img className="product-image" src={currentImage} variant="top" alt={product.name} />
       </Link>
       <Card.Body>
         <Link to={`/product/${product._id}`}>
