@@ -15,7 +15,6 @@ const ProductEditScreen = () => {
   const { id: productId } = useParams();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-const [images, setImages] = useState([]); // start with empty array
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [countInStock, setCountInStock] = useState("");
@@ -32,6 +31,7 @@ const [images, setImages] = useState([]); // start with empty array
     useUploadProductImageMutation();
   const navigate = useNavigate();
 
+  const [images, setImages] = useState(product?.images || []);
   useEffect(() => {
     if (product) {
       setName(product.name);
@@ -59,26 +59,36 @@ const [images, setImages] = useState([]); // start with empty array
     try {
       await updateProduct(updatedProduct).unwrap();
       toast.success("Product Updated Successfully");
-      navigate("/admin/productlist");
+      // Navigate to the product page after updating to show new images
+      refetch();
+      navigate(`/product/${productId}`);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
   const uploadFileHandler = async (e) => {
-     if (images.length + e.target.files.length > 4) {
-    toast.error('Maximum 4 images allowed. Remove some images first.');
-    e.target.value = ""; // reset file input
-    return;
-  }
-    const formData = new FormData();
-    formData.append("image", e.target.files[0]);
-    try {
-      const res = await uploadProductImage(formData).unwrap();
-      toast.success(res.message);
-      setImages(prev => [...prev, res.image]);
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
+    const files = Array.from(e.target.files);
+
+    if (images.length + files.length > 4) {
+      toast.error("Maximum 4 images allowed. Remove some images first.");
       e.target.value = "";
+      return;
+    }
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const res = await uploadProductImage(formData).unwrap();
+        toast.success(res.message);
+        setImages((prev) => [...prev, res.image]); // append new images
+        refetch();
+
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+        e.target.value = "";
+      }
     }
   };
 
@@ -129,12 +139,20 @@ const [images, setImages] = useState([]); // start with empty array
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               ></Form.Control> */}
-              <Form.Control
-                label="Choose File"
-                onChange={uploadFileHandler}
-                type="file"
-                multiple
-              ></Form.Control>
+              <Form.Control type="file" onChange={uploadFileHandler} multiple />
+              <div
+                className="thumbnails"
+                style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}
+              >
+                {images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`uploaded-${idx}`}
+                    className="thumbnail"
+                  />
+                ))}
+              </div>
               {loadingUpload && <Loader />}
             </Form.Group>
 

@@ -58,3 +58,23 @@ table th {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
 }
+
+.thumbnails {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  cursor: pointer;
+  opacity: 0.5; /* half transparent */
+  transition: opacity 0.3s ease; /* smooth transition */
+}
+
+.thumbnail.active {
+  opacity: 1; /* fully visible */
+}

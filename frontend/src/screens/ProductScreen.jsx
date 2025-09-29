@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
@@ -36,6 +36,21 @@ const ProductScreen = () => {
     refetch,
     error,
   } = useGetProductDetailsQuery(productId);
+
+  const [currentImage, setCurrentImage] = useState('');
+
+  // Compute images array safely after product loads
+  const imagesArray = product?.images?.length > 0
+    ? product.images
+    : product?.image
+    ? [product.image]
+    : [];
+
+  useEffect(() => {
+    if (imagesArray.length > 0) {
+      setCurrentImage(imagesArray[0]);
+    }
+  }, [imagesArray]);
 
   const [createReview, { isLoading: loadingReview }] =
     useCreateReviewMutation();
@@ -80,7 +95,31 @@ const ProductScreen = () => {
           <Meta title={product.name} />
           <Row>
             <Col md={5}>
-              <Image src={product.image} alt={product.name} fluid />
+              {/* Use currentImage instead of product.image */}
+              {currentImage && (
+                <Image
+                  src={currentImage}
+                  alt={product.name}
+                  fluid
+                 
+                />
+              )}
+              <div
+                className="thumbnails"
+              >
+                {imagesArray.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    className={`thumbnail ${
+                      currentImage === img ? "active" : ""
+                    }`}
+                    onClick={() => setCurrentImage(img)}
+                    alt={`thumbnail-${idx}`}
+                    
+                  />
+                ))}
+              </div>
             </Col>
             <Col md={4}>
               <ListGroup variant="flush">

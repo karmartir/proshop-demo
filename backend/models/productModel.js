@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const reviewSchema = mongoose.Schema(
   {
@@ -8,7 +8,7 @@ const reviewSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: "User",
     },
   },
   {
@@ -21,17 +21,14 @@ const productSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: "User",
     },
     name: {
       type: String,
       required: true,
     },
-    images: {
-      type: [String],
-      required: true,
-      validate: [val => val.length <= 4, 'Maximum 4 images allowed'],
-    },
+    image: { type: String }, // keep for old products
+    images: [{ type: String }], // array for multiple images
     brand: {
       type: String,
       required: true,
@@ -71,6 +68,6 @@ const productSchema = mongoose.Schema(
   }
 );
 
-const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model("Product", productSchema);
 
 export default Product;
