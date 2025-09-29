@@ -210,11 +210,37 @@ const ProductScreen = () => {
               )}
               <ListGroup variant="flush">
                 {product.reviews.map((review) => (
-                  <ListGroup.Item key={review._id}>
-                    <strong>{review.name}</strong>
-                    <Rating value={review.rating} />
-                    <p>{new Date(review.createdAt).toLocaleDateString()}</p>
-                    <p>{review.comment}</p>
+                  <ListGroup.Item key={review._id} className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <strong>{review.name}</strong>
+                      <Rating value={review.rating} />
+                      <p>{new Date(review.createdAt).toLocaleDateString()}</p>
+                      <p>{review.comment}</p>
+                    </div>
+                    {userInfo?.isAdmin && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="mx-2 text-white"
+                        onClick={async () => {
+                          if (!window.confirm("Are you sure you want to delete this review?")) return;
+                          try {
+                            const response = await fetch(`/api/products/${productId}/reviews/${review._id}`, {
+                              method: "DELETE",
+                              headers: { "Content-Type": "application/json" },
+                            });
+                            if (!response.ok) throw new Error("Failed to delete review");
+                            const data = await response.json();
+                            toast.success("Review deleted successfully");
+                            refetch(); // refresh product to update reviews
+                          } catch (err) {
+                            toast.error(err?.message || "Failed to delete review");
+                          }
+                        }}
+                      >
+                        ×
+                      </Button>
+                    )}
                   </ListGroup.Item>
                 ))}
                 {/* Create a review */}

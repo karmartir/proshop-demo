@@ -1,5 +1,6 @@
 import express from "express";
 import checkObjectId from '../middleware/checkObjectId.js';
+import {deleteProductReview } from "../controllers/productController.js";
 
 const router = express.Router();
 import {
@@ -25,5 +26,8 @@ router
 
 // New route to delete a product image
 router.delete("/:id/images/:imageName", protect, admin, deleteProductImage);
+
+// New route to delete a product review
+router.delete("/:id/reviews/:reviewId", protect, admin, deleteProductReview);
 
 export default router;

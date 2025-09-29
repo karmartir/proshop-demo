@@ -209,6 +209,32 @@ const deleteProductImage = asyncHandler(async (req, res) => {
   res.json({ message: "Image deleted successfully", images: product.images });
 });
 
+
+// @desc Delete a product review by admin
+// @route DELETE /api/products/:id/reviews/:reviewId
+// @access Private/Admin
+const deleteProductReview = asyncHandler(async (req, res) => {
+  const { id, reviewId } = req.params;
+
+  const product = await Product.findById(id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  // Remove the review
+  product.reviews = product.reviews.filter(r => r._id.toString() !== reviewId);
+
+  // Update numReviews and rating
+  product.numReviews = product.reviews.length;
+  product.rating = product.reviews.length
+    ? product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length
+    : 0;
+
+  await product.save();
+  res.json({ message: "Review deleted successfully", reviews: product.reviews });
+});
+
 export {
   getProducts,
   getProductById,
@@ -218,4 +244,5 @@ export {
   createProductReview,
   getTopProducts,
   deleteProductImage,
+  deleteProductReview
 };
