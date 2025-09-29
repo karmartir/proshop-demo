@@ -84,11 +84,31 @@ const ProductEditScreen = () => {
         toast.success(res.message);
         setImages((prev) => [...prev, res.image]); // append new images
         refetch();
-
       } catch (err) {
         toast.error(err?.data?.message || err.error);
         e.target.value = "";
       }
+    }
+  };
+
+  const handleDeleteImage = async (imgUrl) => {
+    if (!window.confirm("Are you sure you want to delete this image?")) return;
+
+    const imageName = imgUrl.split("/").pop(); // get file name
+    try {
+      const response = await fetch(
+        `/api/products/${productId}/images/${imageName}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" }, // no auth needed, page is already protected
+        }
+      );
+      if (!response.ok) throw new Error("Failed to delete image");
+      const data = await response.json();
+      setImages(data.images); // update local images state
+      toast.success("Image deleted successfully");
+    } catch (err) {
+      toast.error(err?.message || "Failed to delete image");
     }
   };
 
@@ -140,17 +160,21 @@ const ProductEditScreen = () => {
                 onChange={(e) => setImage(e.target.value)}
               ></Form.Control> */}
               <Form.Control type="file" onChange={uploadFileHandler} multiple />
-              <div
-                className="thumbnails"
-                style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}
-              >
+              <div className="thumbnails">
                 {images.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`uploaded-${idx}`}
-                    className="thumbnail"
-                  />
+                  <div key={idx} className="thumbnail-wrapper">
+                    <img
+                      src={img}
+                      alt={`uploaded-${idx}`}
+                      className="thumbnail"
+                    />
+                    <span
+                      onClick={() => handleDeleteImage(img)}
+                      className="delete-btn"
+                    >
+                      ×
+                    </span>
+                  </div>
                 ))}
               </div>
               {loadingUpload && <Loader />}

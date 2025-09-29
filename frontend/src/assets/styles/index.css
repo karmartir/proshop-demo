@@ -23,7 +23,6 @@ main {
   white-space: nowrap; /* Prevent wrapping */
 }
 
-
 .product-image {
   height: 200px;       /* uniform image box */
   width: 100%;
@@ -50,6 +49,39 @@ table th {
   margin-top: 10px;
 }
 
+/* Thumbnails container */
+.thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap; /* optional, allows multiple rows if needed */
+  justify-content: center;
+}
+
+/* Wrapper around each thumbnail image */
+.thumbnail-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Thumbnail images */
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover; /* use cover for uniform display */
+  cursor: pointer;
+  opacity: 0.5; /* half transparent */
+  transition: opacity 0.3s ease;
+}
+
+.thumbnail.active {
+  opacity: 1; /* fully visible */
+}
+
+.thumbnail:hover {
+  opacity: 0.8;
+}
+
 .carousel-caption {
   position: absolute;
   width: 100%;
@@ -59,35 +91,37 @@ table th {
   background: rgba(0, 0, 0, 0.5);
 }
 
-.thumbnails {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.thumbnail {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-  cursor: pointer;
-  opacity: 0.5; /* half transparent */
-  transition: opacity 0.3s ease; /* smooth transition */
-}
-
-.thumbnail.active {
-  opacity: 1; /* fully visible */
-}
-
 .main-image-container {
   width: 400px;      /* fixed width */
   height: 400px;     /* fixed height */
   overflow: hidden;  /* crop overflowing parts */
   position: relative;
 }
+
 .main-image {
   width: 100%;       /* scale to container width */
   height: 100%;      /* scale to container height */
   object-fit: contain; /* crop to fill container, maintain aspect ratio */
   transition: transform 0.3s ease;
+}
+
+/* Delete button on top-right of thumbnail */
+.delete-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: red;
 }

@@ -10,6 +10,7 @@ import {
   deleteProduct,
   createProductReview,
   getTopProducts,
+  deleteProductImage, // import new controller
 } from "../controllers/productController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -21,5 +22,8 @@ router
   .get(checkObjectId,getProductById)
   .put(protect, admin, checkObjectId, updateProduct)
   .delete(protect, admin, checkObjectId, deleteProduct);
+
+// New route to delete a product image
+router.delete("/:id/images/:imageName", protect, admin, deleteProductImage);
 
 export default router;

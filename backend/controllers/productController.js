@@ -1,5 +1,7 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Product from "../models/productModel.js";
+import fs from "fs";
+import path from "path";
 
 //@desc    Fetch all products
 //@route   GET /api/products
@@ -182,6 +184,31 @@ const getTopProducts = asyncHandler(async (req, res) => {
   res.status(200).json(products);
 });
 
+// @desc Delete a product image
+// @route DELETE /api/products/:id/images/:imageName
+// @access Private/Admin
+const deleteProductImage = asyncHandler(async (req, res) => {
+  const { id, imageName } = req.params;
+
+  const product = await Product.findById(id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  // Remove image from product.images array
+  product.images = product.images.filter(img => !img.includes(imageName));
+  await product.save();
+
+  // Delete file from server uploads folder
+  const filePath = path.join(process.cwd(), "uploads", imageName);
+  fs.unlink(filePath, (err) => {
+    if (err) console.error("Failed to delete image file:", err);
+  });
+
+  res.json({ message: "Image deleted successfully", images: product.images });
+});
+
 export {
   getProducts,
   getProductById,
@@ -190,4 +217,5 @@ export {
   deleteProduct,
   createProductReview,
   getTopProducts,
+  deleteProductImage,
 };
