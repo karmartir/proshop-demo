@@ -9,6 +9,7 @@ import {
   ListGroup,
   Card,
   Button,
+  Modal,
 } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import Rating from "../components/Rating";
@@ -29,6 +30,8 @@ const ProductScreen = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
 
   const {
     data: product,
@@ -37,14 +40,15 @@ const ProductScreen = () => {
     error,
   } = useGetProductDetailsQuery(productId);
 
-  const [currentImage, setCurrentImage] = useState('');
+  const [currentImage, setCurrentImage] = useState("");
 
   // Compute images array safely after product loads
-  const imagesArray = product?.images?.length > 0
-    ? product.images
-    : product?.image
-    ? [product.image]
-    : [];
+  const imagesArray =
+    product?.images?.length > 0
+      ? product.images
+      : product?.image
+      ? [product.image]
+      : [];
 
   useEffect(() => {
     if (imagesArray.length > 0) {
@@ -95,31 +99,31 @@ const ProductScreen = () => {
           <Meta title={product.name} />
           <Row>
             <Col md={5}>
-              {/* Use currentImage instead of product.image */}
-              {currentImage && (
-                <Image
-                  src={currentImage}
-                  alt={product.name}
-                  fluid
-                 
-                />
-              )}
-              <div
-                className="thumbnails"
-              >
-                {imagesArray.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    className={`thumbnail ${
-                      currentImage === img ? "active" : ""
-                    }`}
-                    onClick={() => setCurrentImage(img)}
-                    alt={`thumbnail-${idx}`}
-                    
-                  />
-                ))}
-              </div>
+              {/* Main image container */}
+            <div className="main-image-container">
+  {currentImage && (
+    <Image
+      src={currentImage}
+      alt={product.name}
+      className="main-image"
+      fluid
+      onClick={() => setModalOpen(true)}
+      style={{ cursor: "pointer" }}
+    />
+  )}
+</div>
+              {/* Thumbnails outside main container */}
+             <div className="thumbnails">
+  {imagesArray.map((img, idx) => (
+    <img
+      key={idx}
+      src={img}
+      className={`thumbnail ${currentImage === img ? "active" : ""}`}
+      onClick={() => setCurrentImage(img)}
+      alt={`thumbnail-${idx}`}
+    />
+  ))}
+</div>
             </Col>
             <Col md={4}>
               <ListGroup variant="flush">
@@ -264,6 +268,20 @@ const ProductScreen = () => {
           </Row>
         </>
       )}
+      <Modal
+        show={modalOpen}
+        onHide={() => setModalOpen(false)}
+        centered
+        size="lg"
+      >
+        <Modal.Body style={{ padding: 0 }}>
+          <img
+            src={currentImage}
+            alt={product?.name}
+            style={{ width: "100%", height: "auto" }}
+          />
+        </Modal.Body>
+      </Modal>
     </>
   );
 };
