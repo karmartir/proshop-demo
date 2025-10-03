@@ -7,8 +7,17 @@ A full-stack eCommerce application built **from scratch** with the **MERN stack*
 - Product search, pagination, and reviews  
 - Shopping cart & checkout process  
 - PayPal & credit card payments  
-- Product image upload  
+- Product image upload
+
+##   🚀 Improvements!    
+- Cloudinary cloud-hosted image uploads for new products (no local backend storage)  
 - Deployment-ready (tested on Render)  
+
+## 🛠️ Custom Modifications  
+- Carousel now dynamically updates with newly uploaded images  
+- Deletion of product images works for both old and new images  
+- Null-safe handling of images to prevent frontend crashes  
+- Frontend fetches images directly from Cloudinary  
 
 ## 🛠️ Tech Stack  
 - **Frontend:** React 18/19, Redux Toolkit, React Router, React Bootstrap  
