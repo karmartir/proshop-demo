@@ -37,9 +37,9 @@ const ProductEditScreen = () => {
       setName(product.name);
       setPrice(product.price);
       setImages(
-        product.images.map((img) =>
-          typeof img === "string" ? { url: img, public_id: null } : img
-        )
+        (product.images || [])
+          .filter((img) => img) // remove null/undefined
+          .map((img) => (typeof img === "string" ? { url: img, public_id: null } : img))
       );
       setBrand(product.brand);
       setCategory(product.category);
@@ -71,49 +71,44 @@ const ProductEditScreen = () => {
   };
 
   const uploadFileHandler = async (e) => {
-  const files = Array.from(e.target.files);
-
-  // Check max 3 images including existing
-  if (images.length + files.length > 5) {
-    toast.error("Maximum 5 images allowed. Remove some images first.");
-    e.target.value = ""; // clear file input
-    return; // stop here
-  }
-
-  const formData = new FormData();
-  formData.append("name", product?.name || name || "");
-  for (let i = 0; i < files.length; i++) {
-    formData.append("images", files[i]);
-  }
-
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error("Image upload failed");
+    const files = Array.from(e.target.files);
+    if (images.length + files.length > 4) {
+      toast.error("Maximum 4 images allowed. Remove some images first.");
+      e.target.value = "";
+      return;
     }
-
-    const data = await response.json();
-    if (data.images && Array.isArray(data.images)) {
-      setImages((prev) => [...prev, ...data.images]);
-      toast.success("Image(s) uploaded successfully");
-      refetch();
-    } else {
-      throw new Error("No image data returned");
+    const formData = new FormData();
+    formData.append("name", product?.name || name || "");
+    for (let i = 0; i < files.length; i++) {
+      formData.append("images", files[i]);
     }
-  } catch (err) {
-    toast.error(err?.message || "Image upload failed");
-    e.target.value = "";
-  }
-};
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error("Image upload failed");
+      }
+      const data = await response.json();
+      if (data.images && Array.isArray(data.images)) {
+        setImages((prev) => [...prev, ...data.images]);
+        toast.success("Image(s) uploaded successfully");
+        refetch();
+      } else {
+        throw new Error("No image data returned");
+      }
+    } catch (err) {
+      toast.error(err?.message || "Image upload failed");
+      e.target.value = "";
+    }
+  };
+
   const handleDeleteImage = async (img) => {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
 
-    // Cloudinary image with public_id
     if (img.public_id) {
+      // Cloudinary image
       try {
         const response = await fetch(`/api/upload/${img.public_id}`, {
           method: "DELETE",
@@ -126,8 +121,8 @@ const ProductEditScreen = () => {
         toast.error(err?.message || "Failed to delete image");
       }
     } else {
-      // Old image (string), just remove from state
-      setImages((prev) => prev.filter((i) => i !== img && i.url !== img));
+      // Old image (string)
+      setImages((prev) => prev.filter((i) => i !== img && i?.url !== img));
       toast.success("Image removed successfully");
     }
   };
@@ -156,7 +151,7 @@ const ProductEditScreen = () => {
                 placeholder="Enter name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Form.Group controlId="price" className="my-2">
@@ -166,27 +161,29 @@ const ProductEditScreen = () => {
                 placeholder="Enter price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Form.Group controlId="image" className="my-2">
               <Form.Label>Images</Form.Label>
               <Form.Control type="file" onChange={uploadFileHandler} multiple />
               <div className="thumbnails">
-                {images.map((img, idx) => {
-                  const src = img.url ? img.url : img; // fallback for old strings
-                  return (
-                    <div key={idx} className="thumbnail-wrapper">
-                      <img src={src} alt={`uploaded-${idx}`} className="thumbnail" />
-                      <span
-                        onClick={() => handleDeleteImage(img)}
-                        className="delete-btn"
-                      >
-                        ×
-                      </span>
-                    </div>
-                  );
-                })}
+                {images
+                  .filter((img) => img) // remove null/undefined
+                  .map((img, idx) => {
+                    const src = img.url ? img.url : img; // fallback for string
+                    return (
+                      <div key={idx} className="thumbnail-wrapper">
+                        <img src={src} alt={`uploaded-${idx}`} className="thumbnail" />
+                        <span
+                          onClick={() => handleDeleteImage(img)}
+                          className="delete-btn"
+                        >
+                          ×
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
               {loadingUpload && <Loader />}
             </Form.Group>
@@ -198,7 +195,7 @@ const ProductEditScreen = () => {
                 placeholder="Enter brand"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Form.Group controlId="countInStock" className="my-2">
@@ -208,7 +205,7 @@ const ProductEditScreen = () => {
                 placeholder="Enter countInStock"
                 value={countInStock}
                 onChange={(e) => setCountInStock(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Form.Group controlId="category" className="my-2">
@@ -218,7 +215,7 @@ const ProductEditScreen = () => {
                 placeholder="Enter category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Form.Group controlId="description" className="my-2">
@@ -228,7 +225,7 @@ const ProductEditScreen = () => {
                 placeholder="Enter description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-              ></Form.Control>
+              />
             </Form.Group>
 
             <Button type="submit" variant="primary" className="my-2">
