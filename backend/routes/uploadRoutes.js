@@ -1,60 +1,68 @@
-import path from 'path';
 import express from 'express';
-import multer from 'multer';
-//import { ensureAdmin } from '../middleware/authMiddleware.js';
+import { upload, cloudinary } from '../middleware/uploadCloudinary.js';
 
 const router = express.Router();
 
-// Set up multer storage configuration
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename(req, file, cb) {
-    cb(
-      null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
-
-// File type validation
-function fileFilter(req, file, cb) {
-  const filetypes = /jpe?g|png|webp/;
-  const mimetypes = /image\/jpe?g|image\/png|image\/webp/;
-
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = mimetypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    cb(null, true);
-  } else {
-    cb(new Error('Images only!'), false);
-  }
-}
-
-const upload = multer({ storage, fileFilter });
-const uploadSingleImage = upload.single('image');
-
 // @route   POST /api/upload
-// @desc    Upload a file
+// @desc    Upload multiple images to Cloudinary
 // @access  Private/Admin
-
 router.post('/', (req, res) => {
-  uploadSingleImage(req, res, function (err) {
+  upload.array('images', 3)(req, res, async (err) => {
     if (err) {
-      return res.status(400).send({ message: err.message });
+      return res.status(500).send({ message: err.message });
     }
 
-    if (!req.file) {
-      return res.status(400).send({ message: 'No file uploaded' });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send({ message: 'No files uploaded' });
     }
 
-    res.status(200).send({
-      message: 'Image uploaded successfully',
-      image: `/${req.file.path}`,
-    });
+    try {
+      const uploadFile = (file) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: 'proshop', resource_type: 'image' }, // optional folder in Cloudinary
+            (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve({
+                  url: result.secure_url,
+                  public_id: result.public_id,
+                });
+              }
+            }
+          );
+          stream.end(file.buffer);
+        });
+      };
+
+      const uploadPromises = req.files.map((file) => uploadFile(file));
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      res.status(200).send({
+        images: uploadedImages, // array of { url, public_id }
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: 'Error processing uploaded files' });
+    }
   });
 });
-                   
+
+// @route   DELETE /api/upload/:public_id
+// @desc    Delete image from Cloudinary
+// @access  Private/Admin
+router.delete('/:public_id', async (req, res) => {
+  try {
+    const { public_id } = req.params;
+    if (!public_id) {
+      return res.status(400).json({ message: 'public_id is required' });
+    }
+    await cloudinary.uploader.destroy(public_id);
+    res.status(200).json({ message: 'Image deleted successfully', public_id });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting image', error });
+  }
+});
+
 export default router;

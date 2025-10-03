@@ -36,7 +36,11 @@ const ProductEditScreen = () => {
     if (product) {
       setName(product.name);
       setPrice(product.price);
-      setImages(product.images || [product.image]);
+      setImages(
+        product.images.map((img) =>
+          typeof img === "string" ? { url: img, public_id: null } : img
+        )
+      );
       setBrand(product.brand);
       setCategory(product.category);
       setCountInStock(product.countInStock);
@@ -50,7 +54,7 @@ const ProductEditScreen = () => {
       productId,
       name,
       price,
-      images,
+      images: images.map((img) => (img.url ? img.url : img)),
       brand,
       category,
       description,
@@ -59,56 +63,72 @@ const ProductEditScreen = () => {
     try {
       await updateProduct(updatedProduct).unwrap();
       toast.success("Product Updated Successfully");
-      // Navigate to the product page after updating to show new images
       refetch();
       navigate(`/product/${productId}`);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
+
   const uploadFileHandler = async (e) => {
-    const files = Array.from(e.target.files);
+  const files = Array.from(e.target.files);
 
-    if (images.length + files.length > 4) {
-      toast.error("Maximum 4 images allowed. Remove some images first.");
-      e.target.value = "";
-      return;
+  // Check max 3 images including existing
+  if (images.length + files.length > 5) {
+    toast.error("Maximum 5 images allowed. Remove some images first.");
+    e.target.value = ""; // clear file input
+    return; // stop here
+  }
+
+  const formData = new FormData();
+  formData.append("name", product?.name || name || "");
+  for (let i = 0; i < files.length; i++) {
+    formData.append("images", files[i]);
+  }
+
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Image upload failed");
     }
 
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      try {
-        const res = await uploadProductImage(formData).unwrap();
-        toast.success(res.message);
-        setImages((prev) => [...prev, res.image]); // append new images
-        refetch();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-        e.target.value = "";
-      }
+    const data = await response.json();
+    if (data.images && Array.isArray(data.images)) {
+      setImages((prev) => [...prev, ...data.images]);
+      toast.success("Image(s) uploaded successfully");
+      refetch();
+    } else {
+      throw new Error("No image data returned");
     }
-  };
-
-  const handleDeleteImage = async (imgUrl) => {
+  } catch (err) {
+    toast.error(err?.message || "Image upload failed");
+    e.target.value = "";
+  }
+};
+  const handleDeleteImage = async (img) => {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
 
-    const imageName = imgUrl.split("/").pop(); // get file name
-    try {
-      const response = await fetch(
-        `/api/products/${productId}/images/${imageName}`,
-        {
+    // Cloudinary image with public_id
+    if (img.public_id) {
+      try {
+        const response = await fetch(`/api/upload/${img.public_id}`, {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" }, // no auth needed, page is already protected
-        }
-      );
-      if (!response.ok) throw new Error("Failed to delete image");
-      const data = await response.json();
-      setImages(data.images); // update local images state
-      toast.success("Image deleted successfully");
-    } catch (err) {
-      toast.error(err?.message || "Failed to delete image");
+        });
+        if (!response.ok) throw new Error("Failed to delete image");
+        await response.json();
+        setImages((prev) => prev.filter((i) => i.public_id !== img.public_id));
+        toast.success("Image deleted successfully");
+      } catch (err) {
+        toast.error(err?.message || "Failed to delete image");
+      }
+    } else {
+      // Old image (string), just remove from state
+      setImages((prev) => prev.filter((i) => i !== img && i.url !== img));
+      toast.success("Image removed successfully");
     }
   };
 
@@ -149,33 +169,24 @@ const ProductEditScreen = () => {
               ></Form.Control>
             </Form.Group>
 
-            {/* {'image input placeholder'} */}
-
             <Form.Group controlId="image" className="my-2">
-              <Form.Label>Image</Form.Label>
-              {/* <Form.Control
-                type="text"
-                placeholder="Enter image url"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              ></Form.Control> */}
+              <Form.Label>Images</Form.Label>
               <Form.Control type="file" onChange={uploadFileHandler} multiple />
               <div className="thumbnails">
-                {images.map((img, idx) => (
-                  <div key={idx} className="thumbnail-wrapper">
-                    <img
-                      src={img}
-                      alt={`uploaded-${idx}`}
-                      className="thumbnail"
-                    />
-                    <span
-                      onClick={() => handleDeleteImage(img)}
-                      className="delete-btn"
-                    >
-                      ×
-                    </span>
-                  </div>
-                ))}
+                {images.map((img, idx) => {
+                  const src = img.url ? img.url : img; // fallback for old strings
+                  return (
+                    <div key={idx} className="thumbnail-wrapper">
+                      <img src={src} alt={`uploaded-${idx}`} className="thumbnail" />
+                      <span
+                        onClick={() => handleDeleteImage(img)}
+                        className="delete-btn"
+                      >
+                        ×
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
               {loadingUpload && <Loader />}
             </Form.Group>
