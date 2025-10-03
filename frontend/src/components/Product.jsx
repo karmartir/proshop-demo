@@ -11,7 +11,7 @@ const Product = ({ product }) => {
     ? [product.image]
     : []; // empty fallback
 
-  const [currentImage, setCurrentImage] = useState(imagesArray[0] || '');
+  const [currentImage, setCurrentImage] = useState(imagesArray[0] || null);
   return (
     <Card className="my-3 p-3 rounded product-card">
       <Link to={`/product/${product._id}`}>
