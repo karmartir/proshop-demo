@@ -50,7 +50,12 @@ const ProductCarousel = () => {
               return (
                 <Carousel.Item key={product._id}>
                   <Link to={`/product/${product._id}`}>
-                    <Image src={imageUrl} alt={product.name} fluid />
+                    <Image
+                      src={imageUrl}
+                      alt={product.name}
+                      fluid
+                      style={{ height: "400px", objectFit: "contain" }}
+                    />
                     <Carousel.Caption>
                       <h2>{product.name} (${product.price})</h2>
                     </Carousel.Caption>
