@@ -67,7 +67,7 @@ npm run build
 # Run production
 npm run server
 ```
-✅ Lessons Learned
+✅ What advantages did I gain?
 	•	Built this project from the ground up, step by step, without boilerplate code
 	•	Gained confidence in full-stack development workflow
 	•	Debugging React/Redux state issues (cart reset on logout, refetch positioning, etc.)
