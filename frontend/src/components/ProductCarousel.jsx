@@ -88,12 +88,22 @@ const ProductCarousel = () => {
                             src={imageUrl}
                             alt={product.name}
                             fluid
-                            style={{ height: `${imageHeight}px`, width: "100%", objectFit: "contain", marginBottom: "0.5rem", display: "block" }}
+                            style={{ height: `${imageHeight}px`, width: "90%", objectFit: "contain", marginBottom: "0.5rem", display: "block" }}
                           />
-                          <div style={{ width: "100%", textAlign: "center", flexGrow: 1, overflow: "hidden" }}>
-                            <h2 style={{ whiteSpace: "normal", wordWrap: "break-word", fontSize: "1.2rem", margin: 0 }}>
-                              {product.name} (${product.price})
+                          <div style={{ width: "100%", textAlign: "center", flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <h2 style={{ whiteSpace: "normal", wordWrap: "break-word", fontSize: "1.1rem", margin: 0 }}>
+                              {product.name}
                             </h2>
+                            <div style={{ marginTop: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                              {[...Array(5)].map((_, i) => (
+                                <span key={i} style={{ color: "#f8c325ff", fontSize: "1.1rem", marginRight: i !== 4 ? "2px" : "0" }}>
+                                  {i < Math.round(product.rating || 0) ? "★" : "☆"}
+                                </span>
+                              ))}
+                            </div>
+                            <div style={{ marginTop: "0.25rem", fontSize: "0.9rem", color: "#555" }}>
+                              {product.numReviews} {product.numReviews === 1 ? "review" : "reviews"}
+                            </div>
                           </div>
                         </div>
                       </Link>
