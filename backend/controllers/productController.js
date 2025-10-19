@@ -33,8 +33,12 @@ const getProducts = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
-  // Return the products along with current page and total pages
-  res.json({ products, page, pages: Math.ceil(count / pageSize) });
+  // Normalize image field for each product
+  const normalizedProducts = products.map((p) => ({
+    ...p._doc,
+    image: p.images?.length ? p.images[0] : p.image || "/images/placeholder.jpg",
+  }));
+  res.json({ products: normalizedProducts, page, pages: Math.ceil(count / pageSize) });
 });
 
 //@desc    Fetch paginated products
@@ -58,7 +62,11 @@ const getPaginatedProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (product) {
-    return res.json(product);
+    const normalizedProduct = {
+      ...product._doc,
+      image: product.images?.length ? product.images[0] : product.image || "/images/placeholder.jpg",
+    };
+    return res.json(normalizedProduct);
   } else {
     res.status(404);
     throw new Error("Resource not found");
