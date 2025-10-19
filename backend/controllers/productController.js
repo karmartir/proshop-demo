@@ -80,12 +80,17 @@ const getProductById = asyncHandler(async (req, res) => {
 // Additional controller functions can be added here
 
 const createProduct = asyncHandler(async (req, res) => {
+  // Handle uploaded images
+  let images = [];
+  if (req.files && req.files.length > 0) {
+    images = req.files.map((file) => `/uploads/${file.filename}`);
+  }
   const product = new Product({
     name: "Sample name",
     price: 0,
     user: req.user._id,
-    image: "/images/sample.jpg",
-    images: [],
+    image: images.length > 0 ? images[0] : "/images/sample.jpg",
+    images: images,
     brand: "Sample brand",
     category: "Sample category",
     countInStock: 0,
@@ -111,11 +116,31 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.name = name;
     product.price = price;
     product.description = description;
-    product.image = image;
-    product.images = req.body.images || product.images;
     product.brand = brand;
     product.category = category;
     product.countInStock = countInStock;
+
+    // If new images are uploaded, append them to product.images
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map((file) => `/uploads/${file.filename}`);
+      // Ensure product.images is an array
+      if (!Array.isArray(product.images)) {
+        product.images = [];
+      }
+      product.images = [...product.images, ...newImages];
+      // Optionally update the main image to the first image if not set
+      if (!product.image && product.images.length > 0) {
+        product.image = product.images[0];
+      }
+    }
+    // Allow updating the main image field if provided
+    if (image) {
+      product.image = image;
+    }
+    // Allow replacing images array if provided in body (e.g., removing images)
+    if (req.body.images) {
+      product.images = req.body.images;
+    }
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
