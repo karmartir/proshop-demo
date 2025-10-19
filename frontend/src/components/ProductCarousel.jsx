@@ -3,10 +3,44 @@ import { Carousel, Image } from "react-bootstrap";
 import Loader from "./Loader";
 import Message from "./Message";
 import { useGetTopProductsQuery } from "../slices/productsApiSlice";
+import { useState, useEffect } from "react";
 
 const ProductCarousel = () => {
-  // Configurable number of items per slide
-  const itemsPerSlide = 3;
+  const [itemsPerSlide, setItemsPerSlide] = useState(3);
+   // Responsive adjustments
+  useEffect(() => {
+    let debounceTimeout = null;
+
+    const updateItemsPerSlide = () => {
+      const width = window.innerWidth;
+      if (width < 768) return 1;      // Mobile
+      else if (width < 1068) return 2; // Tablet and mid-size screens
+      else return 3;                  // Desktop / LG
+    };
+
+    const handleResize = () => {
+      const newItemsPerSlide = updateItemsPerSlide();
+      setItemsPerSlide(newItemsPerSlide);
+    };
+
+    const debouncedResize = () => {
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        handleResize();
+      }, 200);
+    };
+
+    // Initialize itemsPerSlide on mount without debounce
+    handleResize();
+
+    window.addEventListener("resize", debouncedResize);
+
+    return () => {
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+      window.removeEventListener("resize", debouncedResize);
+    };
+  }, []);
+
   const { data: products, isLoading, error } = useGetTopProductsQuery();
 
   const getImageUrl = (product) => {
@@ -57,10 +91,10 @@ const ProductCarousel = () => {
         <Message variant="danger">{error.message}</Message>
       ) : (
         products && (
-          <Carousel pause="hover" className="bg-primary mb-4" indicators={false}>
+          <Carousel pause="hover" className="bg-primary mb-4" indicators={false} style={{ paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
             {groupedProducts.map((group, idx) => (
               <Carousel.Item key={idx}>
-                <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center" }}>
+                <div className="d-flex flex-nowrap justify-content-center align-items-center gap-3">
                   {group.map((product) => {
                     const imageUrl = getImageUrl(product);
                     if (!imageUrl) return null;
@@ -68,41 +102,47 @@ const ProductCarousel = () => {
                       <Link
                         key={product._id}
                         to={`/product/${product._id}`}
-                        style={{ flex: "0 0 auto", textAlign: "center", color: "inherit", textDecoration: "none", display: "flex", justifyContent: "center", alignItems: "center" }}
+                        className="d-flex justify-content-center align-items-center text-center text-decoration-none text-reset"
+                        style={{ flex: "0 0 auto" }}
                       >
-                        <div style={{
-                          width: `${cardWidth}px`,
-                          height: `${cardHeight}px`,
-                          backgroundColor: "white",
-                          padding: "1rem",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                          borderRadius: "0.5rem",
-                          margin: "2rem 0",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "center",
-                          overflow: "hidden"
-                        }}>
+                        <div
+                          className="bg-white p-3 shadow rounded d-flex flex-column justify-content-start align-items-center overflow-hidden"
+                          style={{
+                            width: `${cardWidth}px`,
+                            height: `${cardHeight}px`,
+                            margin: "2rem 0",
+                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.transform = "translateY(-10px)";
+                            e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25)";
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.15)";
+                          }}
+                        >
                           <Image
                             src={imageUrl}
                             alt={product.name}
                             fluid
-                            style={{ height: `${imageHeight}px`, width: "90%", objectFit: "contain", marginBottom: "0.5rem", display: "block" }}
+                            className="mb-2 rounded shadow-sm"
+                            style={{ height: `${imageHeight}px`, width: "90%", objectFit: "contain", display: "block" }}
                           />
-                          <div style={{ width: "100%", textAlign: "center", flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            <h2 style={{ whiteSpace: "normal", wordWrap: "break-word", fontSize: "1.1rem", margin: 0 }}>
+                          <div className="w-100 d-flex flex-column align-items-center flex-grow-1 overflow-hidden">
+                            <h2 className="fw-bold mb-0" style={{ whiteSpace: "normal", wordWrap: "break-word", fontSize: "1.25rem" }}>
                               {product.name}
                             </h2>
-                            <div style={{ marginTop: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            <div className="mt-2 d-flex justify-content-center align-items-center gap-1">
                               {[...Array(5)].map((_, i) => (
-                                <span key={i} style={{ color: "#f8c325ff", fontSize: "1.1rem", marginRight: i !== 4 ? "2px" : "0" }}>
+                                <span key={i} style={{ color: "#f8c325ff", fontSize: "1.1rem" }}>
                                   {i < Math.round(product.rating || 0) ? "★" : "☆"}
                                 </span>
                               ))}
-                            </div>
-                            <div style={{ marginTop: "0.25rem", fontSize: "0.9rem", color: "#555" }}>
-                              {product.numReviews} {product.numReviews === 1 ? "review" : "reviews"}
+                              <div className="text-muted ms-2" style={{ fontSize: "0.9rem" }}>
+                                {product.numReviews} {product.numReviews === 1 ? "review" : "reviews"}
+                              </div>
                             </div>
                           </div>
                         </div>
