@@ -5,6 +5,8 @@ import Message from "./Message";
 import { useGetTopProductsQuery } from "../slices/productsApiSlice";
 
 const ProductCarousel = () => {
+  // Configurable number of items per slide
+  const itemsPerSlide = 3;
   const { data: products, isLoading, error } = useGetTopProductsQuery();
 
   const getImageUrl = (product) => {
@@ -35,6 +37,18 @@ const ProductCarousel = () => {
     return imageUrl;
   };
 
+  // Group products in chunks of itemsPerSlide
+  const groupedProducts = [];
+  if (products) {
+    for (let i = 0; i < products.length; i += itemsPerSlide) {
+      groupedProducts.push(products.slice(i, i + itemsPerSlide));
+    }
+  }
+
+  const cardWidth = 300;
+  const cardHeight = 400;
+  const imageHeight = 250;
+
   return (
     <>
       {isLoading ? (
@@ -44,25 +58,50 @@ const ProductCarousel = () => {
       ) : (
         products && (
           <Carousel pause="hover" className="bg-primary mb-4" indicators={false}>
-            {products.map((product) => {
-              const imageUrl = getImageUrl(product);
-              if (!imageUrl) return null;
-              return (
-                <Carousel.Item key={product._id}>
-                  <Link to={`/product/${product._id}`}>
-                    <Image
-                      src={imageUrl}
-                      alt={product.name}
-                      fluid
-                      style={{ height: "400px", objectFit: "contain" }}
-                    />
-                    <Carousel.Caption>
-                      <h2>{product.name} (${product.price})</h2>
-                    </Carousel.Caption>
-                  </Link>
-                </Carousel.Item>
-              );
-            })}
+            {groupedProducts.map((group, idx) => (
+              <Carousel.Item key={idx}>
+                <div style={{ display: "flex", gap: "1rem", justifyContent: "center", alignItems: "center" }}>
+                  {group.map((product) => {
+                    const imageUrl = getImageUrl(product);
+                    if (!imageUrl) return null;
+                    return (
+                      <Link
+                        key={product._id}
+                        to={`/product/${product._id}`}
+                        style={{ flex: "0 0 auto", textAlign: "center", color: "inherit", textDecoration: "none", display: "flex", justifyContent: "center", alignItems: "center" }}
+                      >
+                        <div style={{
+                          width: `${cardWidth}px`,
+                          height: `${cardHeight}px`,
+                          backgroundColor: "white",
+                          padding: "1rem",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                          borderRadius: "0.5rem",
+                          margin: "2rem 0",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "center",
+                          overflow: "hidden"
+                        }}>
+                          <Image
+                            src={imageUrl}
+                            alt={product.name}
+                            fluid
+                            style={{ height: `${imageHeight}px`, width: "100%", objectFit: "contain", marginBottom: "0.5rem", display: "block" }}
+                          />
+                          <div style={{ width: "100%", textAlign: "center", flexGrow: 1, overflow: "hidden" }}>
+                            <h2 style={{ whiteSpace: "normal", wordWrap: "break-word", fontSize: "1.2rem", margin: 0 }}>
+                              {product.name} (${product.price})
+                            </h2>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </Carousel.Item>
+            ))}
           </Carousel>
         )
       )}
