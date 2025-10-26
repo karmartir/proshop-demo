@@ -31,7 +31,7 @@
 ![Home Page](./screenshots/home.png)  
 
 ### Users Page  
-
+![Users Page](./screenshots/users.png)  
 
 ### Cart  
 ![Cart](./screenshots/cart.png)  
