@@ -1,5 +1,6 @@
 # 🛒 ProShop Demo  
-A full-stack eCommerce application built **from scratch** with the **MERN stack** (MongoDB, Express, React, Node.js).  
+## A full-stack eCommerce application built **from scratch** with the **MERN stack** (MongoDB, Express, React, Node.js).  
+ Please, allow 1-2 minutes for the project to fully load after clicking the link, as it is hosted on a free service.
 
 ## 🚀 Features  
 - User authentication & authorization (JWT)  
